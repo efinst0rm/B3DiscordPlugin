@@ -31,6 +31,7 @@ import datetime
 import urllib2
 import json
 
+from collections import defaultdict
 from b3.functions import minutesStr
 
 
@@ -58,7 +59,6 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         Load plugin configuration.
         """
         self._discordWebhookUrl = self.config.get("authentication","webhookUrl")
-        self._serverName = self.config.get("authentication","hostname")
 
     def onStartup(self):
         """
@@ -72,6 +72,9 @@ class DiscordbanPlugin(b3.plugin.Plugin):
 
         # notice plugin started
         self.debug("plugin started")
+
+    def stripColors(self, s):
+        return re.sub('\^[0-9]{1}','',s)
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -87,8 +90,8 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         admin = event.data["admin"]
         client = event.client
         reason = event.data["reason"]
+        server = self.stripColors(str(dict['sv_hostname'])).lower()
 
-        admin_name = ""
         if admin == None:
             admin_name = "B3"
         else:
@@ -96,13 +99,13 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             
         embed = {
             "title": "B3 Ban",
-            "description": "**%s** Banned **%s**" % (admin_name, client.name),
+            "description": "**%s** Banned **%s**" % (self.stripColors(admin_name), self.stripColors(client.name)),
             "timestamp": datetime.datetime.now().isoformat(),
             "color": 15466496,
             "fields": [
                 {
                     "name": "Server",
-                    "value": self._serverName,
+                    "value": server,
                     "inline": False
                 }
             ]
@@ -112,11 +115,11 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             # if there is a reason attached to the ban, append it to the notice
             embed["fields"].append({
                 "name": "Reason",
-                "value": self.console.stripColors(reason),
+                "value": self.stripColors(reason.replace(',','')),
                 "inline": True
             })
 
-        duration = 'permanent'
+        duration = "permanent"
         if 'duration' in event.data:
             # if there is a duration convert it
             duration = minutesStr(event.data['duration'])
@@ -134,8 +137,8 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         admin = event.data["admin"]
         client = event.client
         reason = event.data["reason"]
+	server = self.stripColors(str(dict['sv_hostname'])).lower()
 		
-        admin_name = ""
         if admin == None:
             admin_name = "B3"
         else:
@@ -143,13 +146,13 @@ class DiscordbanPlugin(b3.plugin.Plugin):
 
         embed = {
             "title": "B3 Kick",
-            "description": "**%s** Kicked **%s**" % (admin_name, client.name),
+            "description": "**%s** Kicked **%s**" % (self.stripColors(admin_name), self.stripColors(client.name)),
             "timestamp": datetime.datetime.now().isoformat(),
             "color": 15466496,
             "fields": [
                 {
                     "name": "Server",
-                    "value": self._serverName,
+                    "value": server,
                     "inline": False
                 }
             ]
@@ -159,7 +162,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             # if there is a reason attached to the ban, append it to the notice
             embed["fields"].append({
                 "name": "Reason",
-                "value": self.console.stripColors(reason),
+                "value": self.stripColors(reason.replace(',','')),
                 "inline": True
             })
 
