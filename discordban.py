@@ -30,6 +30,7 @@ import b3.events
 import datetime
 import urllib2
 import json
+import re
 
 from collections import defaultdict
 from b3.functions import minutesStr
@@ -90,7 +91,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         admin = event.data["admin"]
         client = event.client
         reason = event.data["reason"]
-        server = self.stripColors(str(dict['sv_hostname'])).lower()
+        server = self.stripColors(str(dict['sv_hostname'])).title()
 
         if admin == None:
             admin_name = "B3"
@@ -137,7 +138,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         admin = event.data["admin"]
         client = event.client
         reason = event.data["reason"]
-	server = self.stripColors(str(dict['sv_hostname'])).lower()
+	server = self.stripColors(str(dict['sv_hostname'])).title()
 		
         if admin == None:
             admin_name = "B3"
@@ -174,7 +175,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         """
         data = json.dumps({"embeds": [embed]})
         req = urllib2.Request(self._discordWebhookUrl, data, {
-            "'Content-Type": "application/json",
+            "Content-Type": "application/json",
             "User-Agent": "B3DiscordbanPlugin/1.1" #Is that a real User-Agent? Nope but who cares.
         })
 
