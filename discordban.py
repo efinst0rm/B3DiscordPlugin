@@ -16,10 +16,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-#Credits 
-#Fenix the orginal author of the irc b3 bot which this plugin is based on.
-#Mordecaii from iG for his lovely discordPush fuction <3.
-#ItsDizzy from aD for the embedded message and some cleanups.
+# Credits
+# Fenix the orginal author of the irc b3 bot which this plugin is based on.
+# Mordecaii from iG for his lovely discordPush fuction <3.
+# ItsDizzy from aD for the embedded message and some cleanups.
+#  03.11.2019 - v1.0.3 - Zwmabro
+#  - get server name automatically by B3
+#  - Clean reason from some characters
 
 __author__ = "Fenix, st0rm, Mordecaii, ItsDizzy"
 __version__ = "1.2"
@@ -59,7 +62,8 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         """
         Load plugin configuration.
         """
-        self._discordWebhookUrl = self.config.get("authentication","webhookUrl")
+        self._discordWebhookUrl = self.config.get(
+            "authentication", "webhookUrl")
 
     def onStartup(self):
         """
@@ -67,15 +71,18 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         """
 
         # register necessary events
-        self.registerEvent(self.console.getEventID("EVT_CLIENT_BAN"), self.onBan)
-        self.registerEvent(self.console.getEventID("EVT_CLIENT_BAN_TEMP"), self.onBan)
-        self.registerEvent(self.console.getEventID("EVT_CLIENT_KICK"), self.onKick)
+        self.registerEvent(self.console.getEventID(
+            "EVT_CLIENT_BAN"), self.onBan)
+        self.registerEvent(self.console.getEventID(
+            "EVT_CLIENT_BAN_TEMP"), self.onBan)
+        self.registerEvent(self.console.getEventID(
+            "EVT_CLIENT_KICK"), self.onKick)
 
         # notice plugin started
         self.debug("plugin started")
 
     def stripColors(self, s):
-        return re.sub('\^[0-9]{1}','',s)
+        return re.sub('\^[0-9]{1}', '', s)
 
     ####################################################################################################################
     #                                                                                                                  #
@@ -97,7 +104,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             admin_name = "B3"
         else:
             admin_name = admin.name
-            
+
         embed = {
             "title": "B3 Ban",
             "description": "**%s** Banned **%s**" % (self.stripColors(admin_name), self.stripColors(client.name)),
@@ -116,7 +123,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             # if there is a reason attached to the ban, append it to the notice
             embed["fields"].append({
                 "name": "Reason",
-                "value": self.stripColors(reason.replace(',','')),
+                "value": self.stripColors(reason.replace(',', '')),
                 "inline": True
             })
 
@@ -126,7 +133,8 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             duration = minutesStr(event.data['duration'])
 
         # append the duration to the ban notice
-        embed["fields"].append({"name": "Duration", "value": duration, "inline": True})
+        embed["fields"].append(
+            {"name": "Duration", "value": duration, "inline": True})
 
         self.discordEmbeddedPush(embed)
 
@@ -138,8 +146,8 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         admin = event.data["admin"]
         client = event.client
         reason = event.data["reason"]
-	server = self.stripColors(str(dict['sv_hostname'])).title()
-		
+        server = self.stripColors(str(dict['sv_hostname'])).title()
+
         if admin == None:
             admin_name = "B3"
         else:
@@ -163,7 +171,7 @@ class DiscordbanPlugin(b3.plugin.Plugin):
             # if there is a reason attached to the ban, append it to the notice
             embed["fields"].append({
                 "name": "Reason",
-                "value": self.stripColors(reason.replace(',','')),
+                "value": self.stripColors(reason.replace(',', '')),
                 "inline": True
             })
 
@@ -176,12 +184,15 @@ class DiscordbanPlugin(b3.plugin.Plugin):
         data = json.dumps({"embeds": [embed]})
         req = urllib2.Request(self._discordWebhookUrl, data, {
             "Content-Type": "application/json",
-            "User-Agent": "B3DiscordbanPlugin/1.1" #Is that a real User-Agent? Nope but who cares.
+            # Is that a real User-Agent? Nope but who cares.
+            "User-Agent": "B3DiscordbanPlugin/1.1"
         })
 
         # Final magic happens here, we will never get an error ofcourse ;)
         try:
             urllib2.urlopen(req)
         except urllib2.HTTPError as ex:
-            self.debug("Cannot push data to Discord. is your webhook url right?")
-            self.debug("Data: %s\nCode: %s\nRead: %s" % (data, ex.code, ex.read()))
+            self.debug(
+                "Cannot push data to Discord. is your webhook url right?")
+            self.debug("Data: %s\nCode: %s\nRead: %s" %
+                       (data, ex.code, ex.read()))
